@@ -1,0 +1,18 @@
+[package]
+name = "social_dapp"
+version = "0.1.0"
+edition = "2024_07"
+
+[[target.starknet-contract]]
+sierra = true
+casm = true
+
+[dependencies]
+starknet = ">=2.11.0"
+
+[dev-dependencies]
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.58.0" }
+assert_macros = ">=2.11.0"
+
+[scripts]
+test = "snforge test"

@@ -1,0 +1,37 @@
+   Compiling social_dapp v0.1.0 (/Users/apple/Desktop/2026/social_Dapp_Starknet/files/Scarb.toml)
+warn[E2066]: Usage of deprecated feature `"deprecated-starknet-consts"` with no `#[feature("deprecated-starknet-consts")]` attribute. Note: "Use `TryInto::try_into` in const context instead."
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/social_post.cairo:24:78
+    use starknet::{get_caller_address, get_block_timestamp, ContractAddress, contract_address_const};
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^
+
+warn[E2066]: Usage of deprecated feature `"deprecated-starknet-consts"` with no `#[feature("deprecated-starknet-consts")]` attribute. Note: "Use `TryInto::try_into` in const context instead."
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/content_token.cairo:25:57
+    use starknet::{get_caller_address, ContractAddress, contract_address_const};
+                                                        ^^^^^^^^^^^^^^^^^^^^^^
+
+warn[E2100]: Unused import: `social_dapp::savings_vault::SavingsVault::contract_address_const`
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/savings_vault.cairo:20:57
+    use starknet::{get_caller_address, ContractAddress, contract_address_const};
+                                                        ^^^^^^^^^^^^^^^^^^^^^^
+
+warn[E2066]: Usage of deprecated feature `"deprecated-starknet-consts"` with no `#[feature("deprecated-starknet-consts")]` attribute. Note: "Use `TryInto::try_into` in const context instead."
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/savings_vault.cairo:20:57
+    use starknet::{get_caller_address, ContractAddress, contract_address_const};
+                                                        ^^^^^^^^^^^^^^^^^^^^^^
+
+warn[E2066]: Usage of deprecated feature `"deprecated-starknet-consts"` with no `#[feature("deprecated-starknet-consts")]` attribute. Note: "Use `TryInto::try_into` in const context instead."
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/profile.cairo:29:78
+    use starknet::{get_caller_address, get_block_timestamp, ContractAddress, contract_address_const};
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^
+
+error[E2311]: Trait has no implementation in context: core::hash::HashStateExTrait::<core::poseidon::HashState, core::byte_array::ByteArray>.
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/profile.cairo:57:23
+        state = state.update_with(b.clone());
+                      ^^^^^^^^^^^
+
+warn[E2066]: Usage of deprecated feature `"deprecated-starknet-consts"` with no `#[feature("deprecated-starknet-consts")]` attribute. Note: "Use `TryInto::try_into` in const context instead."
+ --> /Users/apple/Desktop/2026/social_Dapp_Starknet/files/src/marketplace.cairo:26:78
+    use starknet::{get_caller_address, get_block_timestamp, ContractAddress, contract_address_const};
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `social_dapp` due to 1 previous error and 6 warnings
