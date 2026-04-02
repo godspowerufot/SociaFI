@@ -8,6 +8,7 @@ import { RpcProvider, CallData, cairo, num } from "starknet";
 import { STARKNET_RPC_URL } from "@/lib/constants";
 import { Amount, sepoliaTokens, mainnetTokens } from "starkzap";
 import { NETWORK } from "@/lib/constants";
+import { ContentToken } from "@/lib/mock/types";
 
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -34,9 +35,11 @@ interface VoyagerTx {
 }
 
 interface TokenDetailModalProps {
-  tokenAddress: string;
+  tokenAddress?: string;
+  token?: ContentToken;
   isOpen: boolean;
   onClose: () => void;
+  onMarketplaceClick?: () => void;
 }
 
 // ─── Helper: decode ByteArray from raw felts ───────────────────────────────────
@@ -79,7 +82,8 @@ function formatTokenAmount(raw: string, decimals = 18): string {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export default function TokenDetailModal({ tokenAddress, isOpen, onClose }: TokenDetailModalProps) {
+export default function TokenDetailModal({ tokenAddress: propAddress, token, isOpen, onClose, onMarketplaceClick }: TokenDetailModalProps) {
+  const tokenAddress = token?.address || propAddress || "";
   const { wallet, currentUser } = useAuth();
   const { listToken } = useMarketplace();
 
