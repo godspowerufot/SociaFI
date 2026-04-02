@@ -347,137 +347,135 @@ export default function ProfileModal({ address, isOpen, onClose }: ProfileModalP
             </div>
           )}
 
-              {/* Feed Tab */}
-              {activeTab === "feed" && (
-                <div className="p-5 space-y-6">
-                  {isLoadingPosts ? (
-                    <div className="py-20 text-center space-y-4">
-                      <div className="w-12 h-12 border-4 border-black border-t-cyan-400 rounded-full animate-spin mx-auto"></div>
-                      <p className="text-[10px] font-black text-black uppercase tracking-widest animate-pulse font-mono">
-                        FETCHING_BLOCKCHAIN_BROADCASTS...
-                      </p>
-                    </div>
-                  ) : creatorPosts.length > 0 ? (
-                    creatorPosts.map(post => (
-                      <PostCard key={post.id} post={post} creatorProfile={profile} />
-                    ))
-                  ) : (
-                    <div className="py-20 text-center border-4 border-dashed border-black/5">
-                      <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em]">
-                        NO_SIGNALS_DETECTED
-                      </p>
-                    </div>
-                  )}
+          {/* Feed Tab */}
+          {activeTab === "feed" && (
+            <div className="p-5 space-y-6">
+              {isLoadingPosts ? (
+                <div className="py-20 text-center space-y-4">
+                  <div className="w-12 h-12 border-4 border-black border-t-cyan-400 rounded-full animate-spin mx-auto"></div>
+                  <p className="text-[10px] font-black text-black uppercase tracking-widest animate-pulse font-mono">
+                    FETCHING_BLOCKCHAIN_BROADCASTS...
+                  </p>
+                </div>
+              ) : creatorPosts.length > 0 ? (
+                creatorPosts.map(post => (
+                  <PostCard key={post.id} post={post} creatorProfile={profile} />
+                ))
+              ) : (
+                <div className="py-20 text-center border-4 border-dashed border-black/5">
+                  <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em]">
+                    NO_SIGNALS_DETECTED
+                  </p>
                 </div>
               )}
+            </div>
+          )}
 
-              {/* Followers Tab */}
-              {activeTab === "followers" && (
-                <div className="p-5 space-y-4">
-                  {isGraphLoading ? (
-                    <div className="py-10 text-center"><div className="w-6 h-6 border-3 border-black border-t-yellow-400 rounded-full animate-spin mx-auto"></div></div>
-                  ) : followersAddresses.length === 0 ? (
-                    <div className="py-20 text-center border-4 border-dashed border-black/10">
-                      <UserGroupIcon className="w-12 h-12 text-black/10 mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">MESH_NODE_ISOLATION</p>
+          {/* Followers Tab */}
+          {activeTab === "followers" && (
+            <div className="p-5 space-y-4">
+              {isGraphLoading ? (
+                <div className="py-10 text-center"><div className="w-6 h-6 border-3 border-black border-t-yellow-400 rounded-full animate-spin mx-auto"></div></div>
+              ) : followersAddresses.length === 0 ? (
+                <div className="py-20 text-center border-4 border-dashed border-black/10">
+                  <UserGroupIcon className="w-12 h-12 text-black/10 mx-auto mb-4" />
+                  <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">MESH_NODE_ISOLATION</p>
+                </div>
+              ) : (
+                followersAddresses.map(addr => {
+                  const p = profiles[addr];
+                  return (
+                    <div key={addr} className="flex items-center gap-4 p-4 bg-white border-3 border-black brutalist-shadow-sm hover:translate-x-1 transition-transform">
+                      <img src={p?.avatarCid || `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`} alt="" className="w-12 h-12 border-2 border-black bg-slate-100" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black text-black uppercase truncate">{p?.username || "Node " + addr.substring(0, 6)}</p>
+                        <p className="text-[8px] text-black/50 font-black uppercase truncate">{addr}</p>
+                      </div>
+                      <button className="text-[9px] font-black bg-yellow-400 border-2 border-black px-4 py-2 uppercase hover:bg-black hover:text-white transition-colors">VIEW</button>
                     </div>
-                  ) : (
-                    followersAddresses.map(addr => {
-                      const p = profiles[addr];
-                      return (
-                        <div key={addr} className="flex items-center gap-4 p-4 bg-white border-3 border-black brutalist-shadow-sm hover:translate-x-1 transition-transform">
-                          <img src={p?.avatarCid || `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`} alt="" className="w-12 h-12 border-2 border-black bg-slate-100" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-black text-black uppercase truncate">{p?.username || "Node " + addr.substring(0,6)}</p>
-                            <p className="text-[8px] text-black/50 font-black uppercase truncate">{addr}</p>
-                          </div>
-                          <button className="text-[9px] font-black bg-yellow-400 border-2 border-black px-4 py-2 uppercase hover:bg-black hover:text-white transition-colors">VIEW</button>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                  );
+                })
               )}
+            </div>
+          )}
 
-              {/* Following Tab */}
-              {activeTab === "following" && (
-                <div className="p-5 space-y-4">
-                   {isGraphLoading ? (
-                    <div className="py-10 text-center"><div className="w-6 h-6 border-3 border-black border-t-cyan-400 rounded-full animate-spin mx-auto"></div></div>
-                  ) : followingAddresses.length === 0 ? (
-                    <div className="py-20 text-center border-4 border-dashed border-black/10">
-                      <UserGroupIcon className="w-12 h-12 text-black/10 mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">NO_DOWNSTREAM_MESH</p>
+          {/* Following Tab */}
+          {activeTab === "following" && (
+            <div className="p-5 space-y-4">
+              {isGraphLoading ? (
+                <div className="py-10 text-center"><div className="w-6 h-6 border-3 border-black border-t-cyan-400 rounded-full animate-spin mx-auto"></div></div>
+              ) : followingAddresses.length === 0 ? (
+                <div className="py-20 text-center border-4 border-dashed border-black/10">
+                  <UserGroupIcon className="w-12 h-12 text-black/10 mx-auto mb-4" />
+                  <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">NO_DOWNSTREAM_MESH</p>
+                </div>
+              ) : (
+                followingAddresses.map(addr => {
+                  const p = profiles[addr];
+                  return (
+                    <div key={addr} className="flex items-center gap-4 p-4 bg-white border-3 border-black brutalist-shadow-sm">
+                      <img src={p?.avatarCid || `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`} alt="" className="w-12 h-12 border-2 border-black bg-slate-100" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black text-black uppercase truncate">{p?.username || "Node " + addr.substring(0, 6)}</p>
+                        <p className="text-[8px] text-black/50 font-black uppercase truncate">{addr}</p>
+                      </div>
+                      {isOwnProfile && (
+                        <button
+                          onClick={() => handleUnfollow(addr)}
+                          disabled={isProcessing}
+                          className="text-[9px] font-black bg-red-400 text-black border-2 border-black px-4 py-2 uppercase hover:bg-black hover:text-white transition-colors"
+                        >
+                          DROP
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    followingAddresses.map(addr => {
-                      const p = profiles[addr];
-                      return (
-                        <div key={addr} className="flex items-center gap-4 p-4 bg-white border-3 border-black brutalist-shadow-sm">
-                          <img src={p?.avatarCid || `https://api.dicebear.com/7.x/identicon/svg?seed=${addr}`} alt="" className="w-12 h-12 border-2 border-black bg-slate-100" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-black text-black uppercase truncate">{p?.username || "Node " + addr.substring(0,6)}</p>
-                            <p className="text-[8px] text-black/50 font-black uppercase truncate">{addr}</p>
-                          </div>
-                          {isOwnProfile && (
-                            <button
-                              onClick={() => handleUnfollow(addr)}
-                              disabled={isProcessing}
-                              className="text-[9px] font-black bg-red-400 text-black border-2 border-black px-4 py-2 uppercase hover:bg-black hover:text-white transition-colors"
-                            >
-                              DROP
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                  );
+                })
               )}
+            </div>
+          )}
 
-              {/* Settings Tab — Only for own profile */}
-              {activeTab === "settings" && isOwnProfile && (
-                <div className="p-8 space-y-8 bg-[#fdfdfd]">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-black uppercase tracking-[0.3em] font-mono ml-1">// UPDATE_BIO</label>
-                    <textarea
-                      rows={4}
-                      value={editBio}
-                      onChange={(e) => setEditBio(e.target.value)}
-                      className="w-full bg-white border-4 border-black p-5 text-xs font-black text-black focus:outline-none focus:ring-4 focus:ring-yellow-400/20 resize-none brutalist-shadow-sm"
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-black uppercase tracking-[0.3em] font-mono ml-1">// UPDATE_AVATAR_CID</label>
-                    <input
-                      type="text"
-                      value={editAvatar}
-                      onChange={(e) => setEditAvatar(e.target.value)}
-                      className="w-full bg-white border-4 border-black p-5 text-xs font-black text-black focus:outline-none focus:ring-4 focus:ring-cyan-400/20 brutalist-shadow-sm"
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={handleUpdateProfile}
-                    disabled={isProcessing}
-                    className="btn-brutal w-full h-16 flex items-center justify-center gap-4 text-sm"
-                  >
-                    {isProcessing ? (
-                      <div className="w-6 h-6 border-4 border-black border-t-white rounded-full animate-spin"></div>
-                    ) : (
-                      <>
-                        <CheckCircleIcon className="w-7 h-7" />
-                        SYNC_CHANGES_TO_CHAIN
-                      </>
-                    )}
-                  </button>
-                  
-                  <div className="pt-10 border-t-4 border-black space-y-4">
-                    <div className="text-[10px] text-black bg-cyan-400 inline-block px-3 py-1 border-2 border-black uppercase font-black italic tracking-widest">ENCRYPTED_NODE_ADDR</div>
-                    <div className="text-[9px] text-black/40 font-mono break-all bg-black/5 p-4 border-2 border-black border-dashed">{address}</div>
-                  </div>
-                </div>
-              )}
+          {/* Settings Tab — Only for own profile */}
+          {activeTab === "settings" && isOwnProfile && (
+            <div className="p-8 space-y-8 bg-[#fdfdfd]">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-black uppercase tracking-[0.3em] font-mono ml-1">// UPDATE_BIO</label>
+                <textarea
+                  rows={4}
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  className="w-full bg-white border-4 border-black p-5 text-xs font-black text-black focus:outline-none focus:ring-4 focus:ring-yellow-400/20 resize-none brutalist-shadow-sm"
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-black uppercase tracking-[0.3em] font-mono ml-1">// UPDATE_AVATAR_CID</label>
+                <input
+                  type="text"
+                  value={editAvatar}
+                  onChange={(e) => setEditAvatar(e.target.value)}
+                  className="w-full bg-white border-4 border-black p-5 text-xs font-black text-black focus:outline-none focus:ring-4 focus:ring-cyan-400/20 brutalist-shadow-sm"
+                />
+              </div>
+
+              <button
+                onClick={handleUpdateProfile}
+                disabled={isProcessing}
+                className="btn-brutal w-full h-16 flex items-center justify-center gap-4 text-sm"
+              >
+                {isProcessing ? (
+                  <div className="w-6 h-6 border-4 border-black border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="w-7 h-7" />
+                    SYNC_CHANGES_TO_CHAIN
+                  </>
+                )}
+              </button>
+
+              <div className="pt-10 border-t-4 border-black space-y-4">
+                <div className="text-[10px] text-black bg-cyan-400 inline-block px-3 py-1 border-2 border-black uppercase font-black italic tracking-widest">ENCRYPTED_NODE_ADDR</div>
+                <div className="text-[9px] text-black/40 font-mono break-all bg-black/5 p-4 border-2 border-black border-dashed">{address}</div>
+              </div>
             </div>
           )}
         </div>
@@ -485,5 +483,6 @@ export default function ProfileModal({ address, isOpen, onClose }: ProfileModalP
     </div>
   );
 }
+
 
 

@@ -46,9 +46,13 @@ We use Starkzap to integrate the **Cartridge Controller**, enabling a gasless on
 - **Sponsored Fees**: Social interactions (posting, tipping) utilize `feeMode: "sponsored"` where possible, removing the barrier of gas costs for new users.
 - **Atomic Multicalls**: Commands like `tipCreator` bundle multiple contract calls (e.g., ERC20 `approve` + `tip_creator`) into single, atomic transactions.
 
-### 3. Unified Token Architecture
-- **Amount Handling**: The `Amount` class manages STRK conversions and formatting with 18-decimal precision.
-- **Wallet Wrapper**: `InjectedStarkzapWallet` ensures standard wallets provide a consistent interface with built-in transaction simulation (preflight).
+### 3. Native Starknet Staking
+The Vault refactor utilizes the Starkzap SDK to provide a native staking interface for the **Starknet Delegation Protocol**.
+- **Multi-Network Discovery**: Automatically fetches and maps validator pools across both **Sepolia** and **Mainnet**.
+- **Dynamic Context**: The SDK re-initializes on-demand when a user selects a pool, ensuring transactions and token addresses are network-accurate.
+- **Unified Amount Handling**: The `Amount` class manages STRK conversions and formatting with 18-decimal precision.
+- **Two-Step Lifecycle**: Robust handling of native staking requirements, including exit intent declarations followed by cooldown-aware withdrawals.
+- **Wallet Wrapper**: `InjectedStarkzapWallet` ensures standard wallets provide a consistent staking interface with built-in transaction simulation (preflight).
 
 ---
 

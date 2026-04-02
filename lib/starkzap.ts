@@ -3,13 +3,14 @@ import { NETWORK, STARKNET_RPC_URL, STRK_TOKEN_ADDRESS } from "./constants";
 // Singleton SDK instance (client-only)
 let sdkInstance: any = null;
 
-export async function getSDK() {
+export async function getSDK(network: "sepolia" | "mainnet" = NETWORK as any) {
   if (typeof window === "undefined") return null;
-  if (sdkInstance) return sdkInstance;
+  // If sdkInstance exists but network is different, re-initialize
+  if (sdkInstance && sdkInstance.network === network) return sdkInstance;
   
   const { StarkZap } = await import("starkzap");
   sdkInstance = new StarkZap({
-    network: "sepolia"
+    network: network
   });
   return sdkInstance;
 }

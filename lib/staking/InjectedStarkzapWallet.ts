@@ -1,4 +1,5 @@
-import { WalletAccount, Call, RpcProvider } from "starknet";
+import { WalletAccount, Call, RpcProvider, CallData, cairo } from "starknet";
+import { Amount, ChainId, fromAddress } from "starkzap";
 
 const getExplorerUrl = (hash: string) => `https://sepolia.voyager.online/tx/${hash}`;
 
@@ -151,6 +152,168 @@ export class InjectedStarkzapWallet {
       return { ok: true };
     } catch (e: any) {
       return { ok: false, reason: e?.message ?? "Simulation failed" };
+    }
+  }
+
+  // ── Staking Methods ─────────────────────────────────────────────────────────
+
+  private async getStakingContract(): Promise<string> {
+    const chainId = this.getChainId();
+    const isSepolia = chainId === "0x534e5f5345504f4c4941" || chainId.includes("SN_SEPOLIA");
+    
+    // In Starkzap SDK, the staking contract is often managed via internal presets
+    // or passed to the StarkSDK. For this wrapper, we can fetch it from presets
+    // if available, or use a known default for the network.
+    const { getPresets } = await import("starkzap");
+    const presets = getPresets(isSepolia ? ChainId.SEPOLIA : ChainId.MAINNET) as any;
+    return presets.staking?.address || presets.staking || ""; 
+  }
+
+  async enterPool(poolAddress: string, amount: Amount): Promise<Tx> {
+    const stakingContract = await this.getStakingContract();
+    const { sepoliaTokens, mainnetTokens } = await import("starkzap");
+    const isSepolia = this.getChainId().includes("SEPOLIA");
+    const tokens = isSepolia ? sepoliaTokens : mainnetTokens;
+    const strkAddress = (tokens.STRK as any).address || tokens.STRK;
+
+    const amountU256 = cairo.uint256(amount.toBase());
+    const calls: Call[] = [
+      {
+        contractAddress: strkAddress,
+        entrypoint: "approve",
+        calldata: CallData.compile([poolAddress, amountU256]),
+      },
+      {
+        contractAddress: poolAddress,
+        entrypoint: "enter_delegation_pool",
+        calldata: CallData.compile([this.getAddress(), amountU256]),
+      }
+    ];
+
+    return this.execute(calls);
+  }
+
+  async addToPool(poolAddress: string, amount: Amount): Promise<Tx> {
+    const { sepoliaTokens, mainnetTokens } = await import("starkzap");
+    const isSepolia = this.getChainId().includes("SEPOLIA");
+    const tokens = isSepolia ? sepoliaTokens : mainnetTokens;
+    const strkAddress = (tokens.STRK as any).address || tokens.STRK;
+
+    const amountU256 = cairo.uint256(amount.toBase());
+    const calls: Call[] = [
+      {
+        contractAddress: strkAddress,
+        entrypoint: "approve",
+        calldata: CallData.compile([poolAddress, amountU256]),
+      },
+      {
+        contractAddress: poolAddress,
+        entrypoint: "add_to_delegation_pool",
+        calldata: CallData.compile([amountU256]),
+      }
+    ];
+
+    return this.execute(calls);
+  }
+
+  async stake(poolAddress: string, amount: Amount): Promise<Tx> {
+    const isMember = await this.isPoolMember(poolAddress);
+    if (isMember) {
+      return this.addToPool(poolAddress, amount);
+    } else {
+      return this.enterPool(poolAddress, amount);
+    }
+  }
+
+  async claimPoolRewards(poolAddress: string): Promise<Tx> {
+    const calls: Call[] = [
+      {
+        contractAddress: poolAddress,
+        entrypoint: "claim_rewards",
+        calldata: CallData.compile([this.getAddress()]),
+      }
+    ];
+
+    return this.execute(calls);
+  }
+
+  async exitPoolIntent(poolAddress: string, amount: Amount): Promise<Tx> {
+    const amountU256 = cairo.uint256(amount.toBase());
+    const calls: Call[] = [
+      {
+        contractAddress: poolAddress,
+        entrypoint: "exit_delegation_pool_intent",
+        calldata: CallData.compile([amountU256]),
+      }
+    ];
+
+    return this.execute(calls);
+  }
+
+  async exitPool(poolAddress: string): Promise<Tx> {
+    const calls: Call[] = [
+      {
+        contractAddress: poolAddress,
+        entrypoint: "exit_delegation_pool",
+        calldata: CallData.compile([]),
+      }
+    ];
+
+    return this.execute(calls);
+  }
+
+  async getPoolPosition(poolAddress: string): Promise<any> {
+    try {
+      const result = await this.account.callContract({
+        contractAddress: poolAddress,
+        entrypoint: "get_pool_member_info",
+        calldata: [this.getAddress()],
+      });
+
+      // result format depends on contract, but according to Starkzap docs:
+      // staked, rewards, total, unpooling, unpoolTime, commission
+      
+      const stakedLow = BigInt(result[0]);
+      const stakedHigh = BigInt(result[1]);
+      const rewardLow = BigInt(result[2]);
+      const rewardHigh = BigInt(result[3]);
+      
+      const stakedRaw = (stakedHigh << 128n) + stakedLow;
+      const rewardsRaw = (rewardHigh << 128n) + rewardLow;
+
+      const { sepoliaTokens, mainnetTokens } = await import("starkzap");
+      const chainId = this.getChainId();
+      const isSepolia = chainId === "0x534e5f5345504f4c4941" || chainId.includes("SN_SEPOLIA");
+      const tokens = isSepolia ? sepoliaTokens : mainnetTokens;
+
+      return {
+        staked: Amount.fromRaw(stakedRaw, tokens.STRK),
+        rewards: Amount.fromRaw(rewardsRaw, tokens.STRK),
+        total: Amount.fromRaw(stakedRaw + rewardsRaw, tokens.STRK),
+        unpooling: Amount.fromRaw(0n, tokens.STRK), // Placeholder
+        unpoolTime: null, // Placeholder
+        commissionPercent: 0, // Placeholder
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async isPoolMember(poolAddress: string): Promise<boolean> {
+    const pos = await this.getPoolPosition(poolAddress);
+    return !!pos && !pos.staked.isZero();
+  }
+
+  async getPoolCommission(poolAddress: string): Promise<number> {
+    try {
+      const result = await this.account.callContract({
+        contractAddress: poolAddress,
+        entrypoint: "get_commission",
+        calldata: [],
+      });
+      return Number(BigInt(result[0])) / 100;
+    } catch {
+      return 0;
     }
   }
 }
