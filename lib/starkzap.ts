@@ -9,8 +9,13 @@ export async function getSDK(network: "sepolia" | "mainnet" = NETWORK as any) {
   if (sdkInstance && sdkInstance.network === network) return sdkInstance;
   
   const { StarkZap } = await import("starkzap");
+  
+  // Use absolute URL for RPC to ensure Cartridge/SDK resolve it correctly in all contexts
+  const absoluteRpcUrl = window.location.origin + STARKNET_RPC_URL;
+  
   sdkInstance = new StarkZap({
-    network: network
+    network: network,
+    rpcUrl: absoluteRpcUrl
   });
   return sdkInstance;
 }
@@ -23,6 +28,8 @@ export async function connectWallet() {
     sdk.onboard({
       strategy: "cartridge",
       cartridge: {
+        preset: "controller", // Required for Cartridge Controller initialization
+        rpcUrl: window.location.origin + STARKNET_RPC_URL, // Explicit RPC for the controller
         policies: [
           { target: STRK_TOKEN_ADDRESS, method: "transfer" },
           { target: STRK_TOKEN_ADDRESS, method: "approve" },

@@ -492,13 +492,13 @@ export default function TokenDetailModal({ tokenAddress, isOpen, onClose }: Toke
               const creatorBal = BigInt(creatorBalStr);
               const creatorAll = BigInt(creatorAllStr);
               
-              let sellValueRaw: string;
+              let sellValueRaw: bigint;
               try {
                 sellValueRaw = Amount.parse(amount || "0", 18, "STRK").toBase();
               } catch {
-                sellValueRaw = "0";
+                sellValueRaw = 0n;
               }
-              const hasLowLiquidity = mode === "sell" && (creatorBal < BigInt(sellValueRaw) || creatorAll < BigInt(sellValueRaw));
+              const hasLowLiquidity = mode === "sell" && (creatorBal < sellValueRaw || creatorAll < sellValueRaw);
 
 
               return (
