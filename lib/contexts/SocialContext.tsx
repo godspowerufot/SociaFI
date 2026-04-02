@@ -13,6 +13,7 @@ interface SocialContextType {
   follow: (target: ContractAddress) => Promise<void>;
   unfollow: (target: ContractAddress) => Promise<void>;
   createPost: (contentCid: string, title: string) => Promise<string>;
+  tipCreator: (postId: string, amount: string) => Promise<string>;
   setTokenAddress: (postId: string, tokenAddress: ContractAddress) => Promise<string>;
   refreshPosts: () => Promise<void>;
   fetchProfile: (address: string) => Promise<UserProfile | null>;
@@ -26,6 +27,7 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
   const { 
     getAllPosts, 
     createPost: createSocialPost, 
+    tipCreator: tipSocialCreator,
     setTokenAddress: setSocialTokenAddress,
     isTxPending: postTxPending 
   } = useSocialContract();
@@ -130,6 +132,12 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
     return txHash;
   };
 
+  const tipCreator = async (postId: string, amount: string): Promise<string> => {
+    const txHash = await tipSocialCreator(postId, amount);
+    await refreshPosts();
+    return txHash;
+  };
+
   const setTokenAddress = async (postId: string, tokenAddress: ContractAddress) => {
     const txHash = await setSocialTokenAddress(postId, tokenAddress);
     await refreshPosts();
@@ -145,6 +153,7 @@ export function SocialProvider({ children }: { children: React.ReactNode }) {
       follow, 
       unfollow, 
       createPost, 
+      tipCreator,
       setTokenAddress,
       refreshPosts,
       fetchProfile,

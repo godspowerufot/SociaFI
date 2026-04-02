@@ -22,7 +22,7 @@ interface MarketplaceContextType {
   vaultEarnings: Record<ContractAddress, Record<ContractAddress, string>>;
   getPrice: (tokenAddress: ContractAddress, amount: string, isBuy: boolean) => [string, string];
 
-  tipCreator: (postId: string, amount: string) => void;
+  tipCreator: (postId: string, amount: string) => Promise<string>;
   addToken: (token: ContentToken) => void;
   fetchListings: () => Promise<void>;
 }
@@ -34,7 +34,7 @@ const MarketplaceContext = createContext<MarketplaceContextType | undefined>(und
 
 export function MarketplaceProvider({ children }: { children: React.ReactNode }) {
   const { currentUser, strkBalance, setStrkBalance } = useAuth();
-  const { posts, setPosts } = useSocial();
+  const { posts, tipCreator } = useSocial();
   const marketplaceHook = useMarketplaceContract();
 
   const [tokens, setTokens] = useState<Record<ContractAddress, ContentToken>>({
@@ -180,24 +180,6 @@ export function MarketplaceProvider({ children }: { children: React.ReactNode })
     await fetchVaultData();
   };
 
-  const tipCreator = (postId: string, amount: string) => {
-    if (!currentUser) return;
-    const post = posts.find(p => p.id === postId);
-    if (!post) return;
-
-    const currentBalance = parseFloat(strkBalance[currentUser] || "0");
-    const tipAmount = parseFloat(amount);
-    if (currentBalance < tipAmount) return;
-
-    const newBalances = {
-      ...strkBalance,
-      [currentUser]: (currentBalance - tipAmount).toString(),
-      [post.creator]: (parseFloat(strkBalance[post.creator] || "0") + tipAmount).toString()
-    };
-    setStrkBalance(newBalances);
-
-    setPosts(prev => prev.map(p => p.id === postId ? { ...p, tipTotal: (parseFloat(p.tipTotal) + tipAmount).toString() } : p));
-  };
   const addToken = (token: ContentToken) => {
     setTokens(prev => ({ ...prev, [token.address]: token }));
   };
